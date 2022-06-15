@@ -11,52 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
+library(tidyverse)
 medicare <- read_csv("http://www.stat.cmu.edu/cmsac/sure/2022/materials/data/health/eda_projects/medicare_partd_presc_claims.csv")
 ```
 
-# number of claims by state
-
-```{r pressure, echo=FALSE}
-avgNumClaims <- medicare %>%
-  group_by(state = State) %>%
-  summarize(meanNumClaims = mean(NumberClaims))
-  
-avgNumClaims %>%
-  ggplot(aes(x = state, y=meanNumClaims)) +
-  geom_bar(stat="identity") +
-  theme_minimal() +
-  
-```
-
-#number of claims by speciality
-```{r}
-avgNumClaims <- medicare %>%
-  group_by(category = SpecialtyCateg) %>%
-  summarize(meanNumClaims = mean(NumberClaims))
-  
-avgNumClaims %>%
-  ggplot(aes(x = category, y=meanNumClaims)) +
-  geom_bar(stat="identity") +
-  theme_minimal()
-
-
-```
-
-#number of claims by specialty + opioid flag
-
-```{r}
-avgNumClaims <- medicare %>%
-  group_by(category = SpecialtyCateg, opioid = OpioidFlag) %>%
-  summarize(meanNumClaims = mean(NumberClaims))
-  
-avgNumClaims %>%
-  ggplot(aes(x = opioid, y=meanNumClaims)) +
-  geom_bar(stat="identity") +
-  facet_wrap(~ category)
-  theme_minimal()
-
-
-```
 
 #avg claims per state, by opioid flag
 
@@ -75,5 +33,34 @@ avgNumClaims %>%
 
 
 ```
+# average claims per state with non-opioids removed
+
+``` {r}
+opioidOnly <- medicare %>%
+  filter(OpioidFlag == "Opioid") %>%
+  group_by(state = State) %>%
+  summarize(meanNumClaims = mean(NumberClaims))
+
+opioidOnly %>%
+  ggplot(aes(x = state, y=meanNumClaims)) +
+  geom_bar(stat="identity", fill='red') +
+  theme_minimal()
+
+```
+#usmap of above data
+
+```{r}
+library(usmap)
+
+opioidOnly <- medicare %>%
+  filter(OpioidFlag == "Opioid") %>%
+  group_by(state = State) %>%
+  summarize(meanNumClaims = mean(NumberClaims))
 
 
+
+plot_usmap(data=opioidOnly, values="meanNumClaims", color='red')
+
+
+
+```
