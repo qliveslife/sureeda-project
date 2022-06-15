@@ -1,0 +1,79 @@
+---
+title: "SURE EDA Project"
+author: "Akwellé (Q) Quaye"
+date: '2022-06-14'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+medicare <- read_csv("http://www.stat.cmu.edu/cmsac/sure/2022/materials/data/health/eda_projects/medicare_partd_presc_claims.csv")
+```
+
+# number of claims by state
+
+```{r pressure, echo=FALSE}
+avgNumClaims <- medicare %>%
+  group_by(state = State) %>%
+  summarize(meanNumClaims = mean(NumberClaims))
+  
+avgNumClaims %>%
+  ggplot(aes(x = state, y=meanNumClaims)) +
+  geom_bar(stat="identity") +
+  theme_minimal() +
+  
+```
+
+#number of claims by speciality
+```{r}
+avgNumClaims <- medicare %>%
+  group_by(category = SpecialtyCateg) %>%
+  summarize(meanNumClaims = mean(NumberClaims))
+  
+avgNumClaims %>%
+  ggplot(aes(x = category, y=meanNumClaims)) +
+  geom_bar(stat="identity") +
+  theme_minimal()
+
+
+```
+
+#number of claims by specialty + opioid flag
+
+```{r}
+avgNumClaims <- medicare %>%
+  group_by(category = SpecialtyCateg, opioid = OpioidFlag) %>%
+  summarize(meanNumClaims = mean(NumberClaims))
+  
+avgNumClaims %>%
+  ggplot(aes(x = opioid, y=meanNumClaims)) +
+  geom_bar(stat="identity") +
+  facet_wrap(~ category)
+  theme_minimal()
+
+
+```
+
+#avg claims per state, by opioid flag
+
+
+```{r}
+avgNumClaims <- medicare %>%
+  group_by(state = State, opioid = OpioidFlag) %>%
+  summarize(meanNumClaims = mean(NumberClaims))
+  
+avgNumClaims %>%
+  ggplot(aes(x = opioid, y=meanNumClaims)) +
+  geom_bar(stat="identity", fill='red') +
+  facet_wrap(~ state) +
+  
+  theme_minimal()
+
+
+```
+
+
