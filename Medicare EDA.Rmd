@@ -62,5 +62,25 @@ opioidOnly <- medicare %>%
 plot_usmap(data=opioidOnly, values="meanNumClaims", color='red')
 
 
+```
 
+```{r}
+
+#usmap of above data
+
+```{r}
+library(usmap)
+
+opioidOnly <- medicare %>%
+  filter(OpioidFlag == "Opioid") %>%
+  group_by(state = State) %>%
+  summarize(meanNumClaims = mean(NumberClaims))
+
+
+
+plot_usmap(data=opioidOnly, values="meanNumClaims", color='red')
+
+
+
+```
 ```
