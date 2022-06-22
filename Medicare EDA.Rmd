@@ -2,7 +2,9 @@
 title: "SURE EDA Project"
 author: "Akwellé (Q) Quaye"
 date: '2022-06-14'
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -20,16 +22,31 @@ medicare <- read_csv("http://www.stat.cmu.edu/cmsac/sure/2022/materials/data/hea
 
 
 ```{r}
+populations_2019 <- read_csv("/Users/Akwelle/Desktop/SURE 22/SURE EDA Project/state-populations-2019.csv")
+
+populations_2019 <- as.vector(populations_2019$population)
+
 avgNumClaims <- medicare %>%
   group_by(state = State, opioid = OpioidFlag) %>%
-  summarize(meanNumClaims = mean(NumberClaims))
+  summarize(sumNumberClaims = sum(NumberClaims))
+
+avgNumClaims$population <- populations_2019
+
+avgNumClaims_n <- avgNumClaims %>%
+  mutate(sumNumberClaims_n = sumNumberClaims / population * 10000)
+
+plot_colors = rep(c("Non-Opioid", "Opioid"), times=51)
   
 avgNumClaims %>%
   ggplot(aes(x = opioid, y=meanNumClaims)) +
-  geom_bar(stat="identity", fill='red') +
+  geom_bar(stat="identity",aes(fill=plot_colors)) +
+  labs(x = NULL, y = "Average Inusrance Claim Per Provider") +
   facet_wrap(~ state) +
-  
-  theme_minimal()
+  theme_minimal() +
+  scale_fill_discrete(name="Prescription Type") +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position="bottom")
 
 
 ```
@@ -41,9 +58,13 @@ opioidOnly <- medicare %>%
   group_by(state = State) %>%
   summarize(meanNumClaims = mean(NumberClaims))
 
+
+
 opioidOnly %>%
-  ggplot(aes(x = state, y=meanNumClaims)) +
-  geom_bar(stat="identity", fill='red') +
+  ggplot(aes(x = reorder(state, -meanNumClaims), y=meanNumClaims)) +
+  geom_bar(stat="identity", fill='lightblue') +
+  labs(title = "Insurance Claims for Opioids Per Provider in the United States",
+       x = "State", y= "Average Opioid Claims Per Provider")
   theme_minimal()
 
 ```
@@ -59,28 +80,15 @@ opioidOnly <- medicare %>%
 
 
 
-plot_usmap(data=opioidOnly, values="meanNumClaims", color='red')
+plot_usmap(data=opioidOnly, values="meanNumClaims", color='red') +
+  scale_fill_continuous(low="darkblue", high="darkorange", name="Average Opioid Claim Per Provider")
 
 
 ```
 
-```{r}
-
-#usmap of above data
-
-```{r}
-library(usmap)
-
-opioidOnly <- medicare %>%
-  filter(OpioidFlag == "Opioid") %>%
-  group_by(state = State) %>%
-  summarize(meanNumClaims = mean(NumberClaims))
 
 
 
-plot_usmap(data=opioidOnly, values="meanNumClaims", color='red')
 
 
 
-```
-```
